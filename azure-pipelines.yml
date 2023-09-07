@@ -15,6 +15,12 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
+    feedsToUse: 'config'
+    nugetConfigPath: '**/*.nugetconfig'
 
 - task: VSBuild@1
   inputs:
