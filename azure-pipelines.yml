@@ -1,0 +1,39 @@
+# ASP.NET
+# Build and test ASP.NET projects.
+# Add steps that publish symbols, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
+    feedsToUse: 'select'
+    vstsFeed: 'c96d8799-9382-482e-a096-4b4840c12500/2773aa61-df41-45ce-8df3-ea6af9323a4c'
+
+
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    publishWebProjects: true
+
+
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'HalcyonSoft_Subscription(1)(9af933c5-b8ff-4e41-ab1b-339cd1029efa)'
+    appType: 'webAppLinux'
+    appName: 'halcyondashboard'
+    package: '$(System.DefaultWorkingDirectory)/**/*.zip'
