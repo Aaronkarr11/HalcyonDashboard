@@ -26,13 +26,9 @@ steps:
 
 
 - task: DotNetCoreCLI@2
-  displayName: Publish
   inputs:
-    command: publish
-    publishWebProjects: false
-    projects: '$(projectDirectory)\HalcyonDashboard.csproj'
-    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-    zipAfterPublish: true
+    command: 'publish'
+    publishWebProjects: true
 
 
 - task: AzureWebApp@1
