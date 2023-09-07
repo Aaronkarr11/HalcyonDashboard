@@ -18,7 +18,9 @@
     </div>
     <footer>
         <div class="text-center">
-            <div>Last refresh at @DateTime.Now</div>
+            <div>
+               v1.1 - Last refresh at @System.TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))
+            </div>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
