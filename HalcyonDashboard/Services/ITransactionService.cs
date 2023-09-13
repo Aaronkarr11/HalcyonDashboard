@@ -6,6 +6,6 @@ namespace HalcyonDashboard.Services
     {
         DashBoard DashBoardData { get; set; }
 
-        Task<DashBoard> GetWorkTaskPercentages();
+        Task<HttpResponseMessage> GetWorkTaskPercentages();
     }
 }

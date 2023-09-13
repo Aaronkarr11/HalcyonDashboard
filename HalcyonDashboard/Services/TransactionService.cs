@@ -1,5 +1,4 @@
-﻿using HalcyonDashboard.Controllers;
-using HalcyonSoft.SharedEntities;
+﻿using HalcyonSoft.SharedEntities;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Text;
@@ -12,28 +11,26 @@ namespace HalcyonDashboard.Services
         private readonly ILogger<TransactionService> _logger;
         private readonly ApplicationSettings _settings;
 
-        public TransactionService(HttpClient client, ILogger<TransactionService> logger, IOptions<ApplicationSettings> settings)
+        public TransactionService(HttpClient client)
         {
             _client = client;
-            _settings = settings.Value;
-            _logger = logger;
         }
 
-        public async Task<DashBoard> GetWorkTaskPercentages()
+        public async Task<HttpResponseMessage> GetWorkTaskPercentages()
         {
             try
             {
                 WorkTaskModel model = new WorkTaskModel();
-                model.DeviceName = _settings.AzureSettings.Name;
+                model.DeviceName = "Maya";
                 string content = JsonConvert.SerializeObject(model);
 
-                string uri = _settings.AzureSettings.DashBoardDataURI;
+                string uri = "https://halcyontransactions.azurewebsites.net/api/GetDashBoardData?code=2PL_pLnmNR5ZCBc1CGwYViF8h2EdPSRb8cTbQs86x8fjAzFuu6bKjA==";
                 var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
-                var res = _client.PostAsync(uri, stringContent).Result.Content.ReadAsStringAsync().Result;
-
+                var response = await _client.PostAsync(uri, stringContent);
+                return response;
                 //var filteredResult = Newtonsoft.Json.JsonConvert.DeserializeObject<DashBoard>(rawResponse);
-                var data = JsonConvert.DeserializeObject<DashBoard>(res);
-                return data;
+                //var data = JsonConvert.DeserializeObject<DashBoard>(res.Result);
+                // return data;
             }
             catch (Exception ex)
             {

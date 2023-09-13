@@ -1,0 +1,36 @@
+﻿@page "/"
+@using HalcyonDashboard.Services;
+@using HalcyonSoft.SharedEntities;
+@inject IConfiguration configuration;
+@inject HttpClient Http;
+@inject ITransactionService serv;
+
+<PageTitle>Index</PageTitle>
+<p></p>
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+<h1>@response</h1>
+
+
+@code{
+    private string response;
+    DashBoard pog;
+
+    protected override async Task OnInitializedAsync()
+    {
+        HttpResponseMessage httpResponseMessage = await serv.GetWorkTaskPercentages();
+
+        if (!httpResponseMessage.IsSuccessStatusCode)
+        {
+
+        }
+        else
+        {
+            response = httpResponseMessage.Content.ReadAsStringAsync().Result;
+        }
+    }
+
+
+}
+
