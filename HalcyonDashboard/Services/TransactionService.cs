@@ -27,10 +27,7 @@ namespace HalcyonDashboard.Services
                 string uri = "https://halcyontransactions.azurewebsites.net/api/GetDashBoardData?code=2PL_pLnmNR5ZCBc1CGwYViF8h2EdPSRb8cTbQs86x8fjAzFuu6bKjA==";
                 var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
                 var response = await _client.PostAsync(uri, stringContent);
-                return response;
-                //var filteredResult = Newtonsoft.Json.JsonConvert.DeserializeObject<DashBoard>(rawResponse);
-                //var data = JsonConvert.DeserializeObject<DashBoard>(res.Result);
-                // return data;
+                return response;;
             }
             catch (Exception ex)
             {

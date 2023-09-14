@@ -1,36 +1,231 @@
 ﻿@page "/"
 @using HalcyonDashboard.Services;
+@using HalcyonDashboard.ViewModels;
+@using HalcyonSoft.Clients;
 @using HalcyonSoft.SharedEntities;
+@using LiveChartsCore.SkiaSharpView.Blazor
+@using LiveChartsCore;
+@using CommunityToolkit.Mvvm.ComponentModel;
+@using LiveChartsCore.SkiaSharpView;
+@using LiveChartsCore.SkiaSharpView.Extensions;
+@using LiveChartsCore.SkiaSharpView.Painting;
+@using LiveChartsCore.SkiaSharpView.VisualElements;
+@using Newtonsoft.Json;
+@using SkiaSharp;
 @inject IConfiguration configuration;
 @inject HttpClient Http;
 @inject ITransactionService serv;
 
-<PageTitle>Index</PageTitle>
-<p></p>
-
-<SurveyPrompt Title="How is Blazor working for you?" />
-
-<h1>@response</h1>
 
 
-@code{
-    private string response;
-    DashBoard pog;
+    <CartesianChart Series="SeriesCollection" Title="LineGraphTitle" />
 
+
+
+
+@code {
     protected override async Task OnInitializedAsync()
     {
-        HttpResponseMessage httpResponseMessage = await serv.GetWorkTaskPercentages();
-
-        if (!httpResponseMessage.IsSuccessStatusCode)
+        try
         {
 
-        }
-        else
+            HttpResponseMessage httpResponseMessage = await serv.GetWorkTaskPercentages();
+
+            DashBoardData = JsonConvert.DeserializeObject<DashBoard>(httpResponseMessage.Content.ReadAsStringAsync().Result);
+            // var pog  =  serv.GetDashBoardData("Maya");
+            // DashBoardData = pog.Result;
+
+            PieGraphTitle = $"Work Tasks Overview for {DateTime.Now.Year}";
+            BarGraphTitle = $"Comparison of Last Month & Current Month";
+
+
+            DashBoardData.percentageData.percentCompleted = DashBoardData.percentageData.percentCompleted.ToString() == "NaN" ? 0 : DashBoardData.percentageData.percentCompleted;
+            DashBoardData.percentageData.percentUnCompleted = DashBoardData.percentageData.percentUnCompleted.ToString() == "NaN" ? 100 : DashBoardData.percentageData.percentUnCompleted;
+
+            //   var data = new double[] { Percentages.PercentUnCompleted, Percentages.PercentCompleted };
+
+            var graphData = new double[] { DashBoardData.percentageData.percentUnCompleted, DashBoardData.percentageData.percentCompleted };
+            BarSeries = new ISeries[]
+               {
+           new ColumnSeries<int>
         {
-            response = httpResponseMessage.Content.ReadAsStringAsync().Result;
+            Name = DashBoardData.barGraphData.LastMonth,
+            Values = new [] { DashBoardData.barGraphData.CompletedCountForLastMonth},
+           Fill = new SolidColorPaint(SKColors.Blue),
+
+
+        },
+            new ColumnSeries<int>
+        {
+            Name = DashBoardData.barGraphData.CurrentMonth,
+            Values = new [] { DashBoardData.barGraphData.CompletedCountForCurrentMonth },
+            Fill = new SolidColorPaint(SKColors.LightBlue)
+
         }
+               };
+
+            BarXAxes = new List<Axis>
+            {
+                new Axis
+                {
+                       TextSize = 0,
+
+                }
+
+            };
+
+            BarYAxes = new List<Axis>
+            {
+                new Axis
+                {
+                     TextSize = 35
+                }
+
+            };
+
+            var data = new double[] { DashBoardData.percentageData.percentUnCompleted, DashBoardData.percentageData.percentCompleted };
+
+            int counter = 1;
+            Series = data.AsPieSeries((value, series) =>
+            {
+                if (counter == 1)
+                {
+                    series.Name = $"Uncompleted Work Tasks: {value}%";
+                    series.DataLabelsPaint = new SolidColorPaint(new SKColor(30, 30, 30));
+                    series.Fill = new SolidColorPaint(SKColors.Yellow);
+                    series.DataLabelsSize = 0;
+                    series.TooltipLabelFormatter = p => $"{p.PrimaryValue} / {p.StackedValue!.Total} ({p.StackedValue.Share:P2})";
+                }
+                else if (counter == 2)
+                {
+                    series.Name = $"Completed Work Tasks: {value}%";
+                    series.DataLabelsPaint = new SolidColorPaint(new SKColor(30, 30, 30));
+                    series.Fill = new SolidColorPaint(SKColors.Green);
+                    series.DataLabelsSize = 0;
+                    series.TooltipLabelFormatter = p => $"{p.PrimaryValue} / {p.StackedValue!.Total} ({p.StackedValue.Share:P2})";
+                }
+                counter++;
+            });
+
+            List<string> labels = new List<string>();
+
+            foreach (var item in DashBoardData.lineGraphModel)
+            {
+                labels.Add(item.Name);
+            };
+
+            List<LineGraphModelItem> lineGraphModels = new List<LineGraphModelItem>();
+
+            SeriesCollection = new ISeries[]
+    {
+               new LineSeries<LineGraphModelItem>
+            {
+                Values = new List<LineGraphModelItem>(lineGraphModels = DashBoardData.lineGraphModel),
+                Fill = new SolidColorPaint(SKColors.LightSkyBlue),
+                Name = $"Total Completed Work",
+                Stroke = new SolidColorPaint(SKColors.Blue) { StrokeThickness = 6 },
+                GeometryStroke = new SolidColorPaint(SKColors.DarkBlue){ StrokeThickness = 6 },
+                XToolTipLabelFormatter =
+        (chartPoint) => $"{chartPoint.Model.Name}: {chartPoint.Model.TotalCompleted}"
+            }
+             };
+
+            XAxes = new List<Axis>
+                 {
+                     new Axis
+                     {
+                         Labels = labels,
+                         TextSize = 35
+                     }
+                 };
+
+            YAxes = new List<Axis>
+                 {
+                     new Axis
+                     {
+                         TextSize = 35
+                     }
+                 };
+
+        }
+        catch (Exception ex)
+        {
+            
+        }
+
     }
 
+    public LabelVisual LineGraphTitle { get; set; } =
+    new LabelVisual
+        {
+            Text = $"Total Completed Work for {DateTime.Now.Year}",
+            TextSize = 25,
+            Padding = new LiveChartsCore.Drawing.Padding(15),
+            Paint = new SolidColorPaint(SKColors.DarkSlateGray)
+        };
 
+
+    public DashBoard? DashBoardData { get; set; }
+    public string PieGraphTitle { get; set; }
+    public string BarGraphTitle { get; set; }
+    public IEnumerable<ISeries> Series
+    {
+        get;
+        set;
+    }
+
+    public IEnumerable<ISeries> BarSeries
+    {
+        get;
+        set;
+    }
+
+    public IEnumerable<ISeries> BarSeries2
+    {
+        get;
+        set;
+    }
+
+    public ISeries[] SeriesCollection
+    {
+        get;
+        set;
+    }
+
+    public List<Axis> XAxes
+    {
+        get;
+        set;
+    }
+
+    public List<Axis> BarXAxes
+    {
+        get;
+        set;
+    }
+
+    public List<Axis> BarYAxes
+    {
+        get;
+        set;
+    }
+
+    public List<Axis> BarXAxes2
+    {
+        get;
+        set;
+    }
+
+    public List<Axis> BarYAxes2
+    {
+        get;
+        set;
+    }
+
+    public List<Axis> YAxes
+    {
+        get;
+        set;
+    }
 }
 
