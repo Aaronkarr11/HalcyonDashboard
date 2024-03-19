@@ -42,6 +42,17 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write #This is required for requesting the JWT
+      
+      - name: 'Resolve Project Dependencies Using Dotnet'
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+        shell: pwsh
+        run: |
+          dotnet nuget add source --username "${{ env.USERNAME }}" --password "${{ env.AZURE_DEVOPS_TOKEN }}" --store-password-in-clear-text --name HalcyonSoft "https://pkgs.dev.azure.com/HalcyonSoft/Software/_packaging/HalcyonSoft/nuget/v3/index.json"
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          dotnet build --configuration Release --output ./output
+          popd
 
     steps:
       - name: Download artifact from build job
