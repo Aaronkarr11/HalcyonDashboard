@@ -33,7 +33,9 @@ jobs:
         shell: pwsh
         run: |
           dotnet nuget add source --username "${{ env.USERNAME }}" --password "${{ env.AZURE_DEVOPS_TOKEN }}" --store-password-in-clear-text --name HalcyonSoft "https://pkgs.dev.azure.com/HalcyonSoft/Software/_packaging/HalcyonSoft/nuget/v3/index.json"
-          pushd './${{env.DOTNET_ROOT}}/myapp'
+          echo pog
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          echo pog
           dotnet build --configuration Release --output ./output
           popd
 
