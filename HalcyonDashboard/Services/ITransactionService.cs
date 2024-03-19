@@ -1,4 +1,4 @@
-﻿using HalcyonSoft.SharedEntities;
+﻿using HalcyonCore.SharedEntities;
 
 namespace HalcyonDashboard.Services
 {
@@ -6,6 +6,6 @@ namespace HalcyonDashboard.Services
     {
         DashBoard DashBoardData { get; set; }
 
-        Task<HttpResponseMessage> GetWorkTaskPercentages();
+        Task<DashBoard> GetWorkTaskPercentages();
     }
 }

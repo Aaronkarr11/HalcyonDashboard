@@ -1,4 +1,5 @@
-﻿using HalcyonSoft.SharedEntities;
+﻿using HalcyonDashboard.Controllers;
+using HalcyonCore.SharedEntities;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Text;
@@ -11,23 +12,28 @@ namespace HalcyonDashboard.Services
         private readonly ILogger<TransactionService> _logger;
         private readonly ApplicationSettings _settings;
 
-        public TransactionService(HttpClient client)
+        public TransactionService(HttpClient client, ILogger<TransactionService> logger, IOptions<ApplicationSettings> settings)
         {
             _client = client;
+            _settings = settings.Value;
+            _logger = logger;
         }
 
-        public async Task<HttpResponseMessage> GetWorkTaskPercentages()
+        public async Task<DashBoard> GetWorkTaskPercentages()
         {
             try
             {
                 WorkTaskModel model = new WorkTaskModel();
-                model.DeviceName = "Maya";
+                model.DeviceName = _settings.AzureSettings.Name;
                 string content = JsonConvert.SerializeObject(model);
 
-                string uri = "https://halcyontransactions.azurewebsites.net/api/GetDashBoardData?code=2PL_pLnmNR5ZCBc1CGwYViF8h2EdPSRb8cTbQs86x8fjAzFuu6bKjA==";
+                string uri = _settings.AzureSettings.DashBoardDataURI;
                 var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
-                var response = await _client.PostAsync(uri, stringContent);
-                return response;;
+                var res = _client.PostAsync(uri, stringContent).Result.Content.ReadAsStringAsync().Result;
+
+                //var filteredResult = Newtonsoft.Json.JsonConvert.DeserializeObject<DashBoard>(rawResponse);
+                var data = JsonConvert.DeserializeObject<DashBoard>(res);
+                return data;
             }
             catch (Exception ex)
             {

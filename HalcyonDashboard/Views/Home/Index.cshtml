@@ -1,0 +1,117 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="container">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <div class="col-12">
+        <div class="row justify-content-center">
+            <div id="chart_div" style="width: 700px; height: 300px;"></div>
+        </div>
+        <div class="row justify-content-center">
+            <div id="chartline_div" style="width: 700px; height: 300px;"></div>
+        </div>
+        <div class="row">
+        </div>
+    </div>
+
+</div>
+
+
+<script type="text/javascript">
+
+    google.charts.load('current', {
+        packages: ['corechart', 'bar']
+    });
+    google.charts.setOnLoadCallback(LoadData);
+
+    function LoadData() {
+        $.ajax({
+
+            url: 'Home/Pie',
+            dataType: "json",
+            type: "GET",
+            error: function (xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                toastr.error(err.message);
+            },
+            success: function (data) {
+                PopulationChart(data);
+                LineChart(data);
+                return false;
+            }
+        });
+        return false;
+    }
+
+    function PopulationChart(datapassed) {
+        var data = google.visualization.arrayToDataTable([
+            ['Name', 'Percentage'],
+            ['InComplete', datapassed.pieChartModel.percentageIncomplete],
+            ['Complete',   datapassed.pieChartModel.percentageComplete]
+        ]);
+
+
+        var options = {
+            title: 'Total Work Completed for @DateTime.Now.Year',
+
+            is3D: false,
+            isStacked: true,
+            backgroundColor: { fill: 'transparent' },
+            chartArea: {
+                width: '50%'
+            },
+            colors: ['#b0120a', '#7b1fa2', '#0066ff'],
+            hAxis: {
+                title: 'Incomplete',
+                minValue: 0
+            },
+            vAxis: {
+                title: 'Completed'
+            }
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));  
+  
+        chart.draw(data, options);  
+        return false;  
+    }
+
+    function LineChart(dataPassed) {
+
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'X');
+        data.addColumn('number', 'Work Tasks Completed');
+
+        data.addRows([
+            ['Jan', dataPassed.lineChartModel.janAmount], ['Feb', dataPassed.lineChartModel.febAmount], ['Mar', dataPassed.lineChartModel.marchAmount], ['Apr', dataPassed.lineChartModel.aprilAmount], 
+            ['May', dataPassed.lineChartModel.mayAmount], ['Jun', dataPassed.lineChartModel.juneAmount], ['July', dataPassed.lineChartModel.julyAmount], ['Aug', dataPassed.lineChartModel.augAmount],
+            ['Sep', dataPassed.lineChartModel.sepAmount], ['Oct', dataPassed.lineChartModel.octAmount], ['Nov', dataPassed.lineChartModel.novAmount], ['Dec', dataPassed.lineChartModel.decAmount],
+        ]);
+
+
+        var options = {
+            title: 'Work',
+
+            is3D: false,
+            isStacked: true,
+            backgroundColor: { fill: 'transparent' },
+            chartArea: {
+                width: '50%'
+            },
+            colors: ['#b0120a', '#7b1fa2', '#0066ff'],
+            hAxis: {
+                title: 'Months',
+                minValue: 0
+            },
+            vAxis: {
+                title: 'Work Tasks'
+            }
+        };
+        var chart = new google.visualization.LineChart(document.getElementById('chartline_div'));
+        chart.draw(data, options);
+
+        return false;
+    }
+</script>
+
+
+<script>setTimeout('window.location.href = window.location.href', 300000);</script>
