@@ -43,6 +43,13 @@ jobs:
     permissions:
       id-token: write #This is required for requesting the JWT
       
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: .net-app
+
       - name: 'Resolve Project Dependencies Using Dotnet'
         env:
           USERNAME: ${{ secrets.USERNAME }}
@@ -53,13 +60,7 @@ jobs:
           pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
           dotnet build --configuration Release --output ./output
           popd
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: .net-app
-      
+          
       - name: Login to Azure
         uses: azure/login@v1
         with:
