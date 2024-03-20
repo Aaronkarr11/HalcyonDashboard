@@ -32,7 +32,7 @@ jobs:
           AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
         shell: pwsh
         run: |
-          dotnet nuget add source --username "${{ env.USERNAME }}" --password "${{ env.AZURE_DEVOPS_TOKEN }}" --store-password-in-clear-text --name HalcyonSoft "https://pkgs.dev.azure.com/HalcyonSoft/Software/_packaging/HalcyonSoft/nuget/v3/index.json"
+          dotnet nuget add source --username "Aaronkarr11" --password "${{ secrets.NUGET_TOKEN }}" --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Aaronkarr11/index.json"
           echo pog
           pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
           echo pog
